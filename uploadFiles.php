@@ -2,7 +2,8 @@
     error_reporting(E_ALL); // Error engine - always E_ALL!
 
     include 'vendor/autoload.php';
-    
+    $num_almacen = $_POST["almacen"];
+    $cliente = $_POST["cliente"];
     $target_dir = "uploads/";
     $file_name = basename($_FILES["filePDF"]["name"]);
     $target_file_pdf = $target_dir . basename($_FILES["filePDF"]["name"]);
@@ -52,15 +53,57 @@
         } else {
             // echo '<script>alert("Lo siento, hubo un error al subir el archivo XML"); location.replace(document.referrer);</script>';
         }
-        generateMod($file_name, $arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida);
+        generateMod($cliente, $num_almacen, $file_name, $arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida);
     }else{
         echo "Problems while converting";
     }
 
-function generateMod($file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
+function generateMod($cliente, $num_almacen,$file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
     $file_name = substr($file_name, 0, -4);
     echo $file_name;
     $myfile = fopen($file_name.".mod", "w");
+
+    fwrite($myfile,"[Cabeza]\n");
+    fwrite($myfile,"RPROVEE=.\n");
+    fwrite($myfile,"PROVEE=    ".$cliente."\n");
+    fwrite($myfile,"ENTRE=.\n");
+    fwrite($myfile,"ALMA=".$num_almacen."\n");
+    fwrite($myfile,"IMPU=10\n");
+    fwrite($myfile,"DESC=.\n");
+    fwrite($myfile,"DESCFIN=.\n");
+    fwrite($myfile,"OBSDOC=.\n");
+    fwrite($myfile,"MONEDA=1\n");
+    fwrite($myfile,"TIPCAM=        1.00000\n");
+    fwrite($myfile,"FLETE=.\n");
+
+    for ($i=0; $i < count($arrayCantidad); $i++) { 
+        $cantidad = $arrayCantidad[$i];
+        $producto = $arrayClaves[$i];
+        $partida = $arrayPartida[$i];
+        $costo = $arrayValorUnitario[$i];
+
+        fwrite($myfile,"[Partida" . $partida . "]\n");
+        fwrite($myfile,'CANTI=             ' . $cantidad . "\n");
+        fwrite($myfile,"PROD=" . $producto . "\n");
+        fwrite($myfile,"DESC 1=.". "\n");
+        fwrite($myfile,"ESQ_IMP=10". "\n");
+        fwrite($myfile,"IMPU 1=.". "\n");
+        fwrite($myfile,"IMPU 2=.". "\n");
+        fwrite($myfile,"IMPU 3=.". "\n");
+        fwrite($myfile,"IMPU 4=16.000". "\n");
+        fwrite($myfile,"COSTO=             " . $costo. "\n");
+        fwrite($myfile,"UNIDAD=pz". "\n");
+        fwrite($myfile,"FACTUNI=      1.000". "\n");
+        fwrite($myfile,"OBSPAR=.". "\n");
+    }
+
+    fclose($myfile);
+}
+
+function generateModXML($file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
+    $file_name = substr($file_name, 0, -4);
+    echo $file_name;
+    $myfile = fopen($file_name.".xml", "w");
     $txt = "John Doe\n";
     fwrite($myfile, $txt);
     $txt = "Jane Doe\n";
@@ -108,7 +151,8 @@ function readXML($target_file_xml){
 
     foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto') as $Concepto){
         $valUnit = (float)$Concepto['ValorUnitario'];
-        $tempValor = number_format($valUnit, 5, '.', '');
+        $tempValor = number_format($valUnit, 5, '.', ',');
+        
         array_push($arrayCantidad, $Concepto['Cantidad']);
         array_push($arrayValorUnitario, $tempValor);
         array_push($arrayPartida,str_pad($numPartida, 3, '0', STR_PAD_LEFT));
