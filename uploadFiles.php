@@ -66,7 +66,7 @@ if (move_uploaded_file($_FILES["fileXML"]["tmp_name"], $target_file_xml)) {
 
     echo "New method";
 
-    readInvoice($target_file_xml);
+    readXML($target_file_xml);
     
     // $xf = file_get_contents($target_file_xml);
     // $xml = simplexml_load_string($xf);
@@ -96,45 +96,6 @@ function readPDF($target_file_pdf){
 }
 
 function readXML($target_file_xml){
-    // Code to be executed
-    $xml=simplexml_load_file($target_file_xml) or die("Error: Cannot create XML object");
-    if ($xml === false) {
-        echo "Failed loading XML: ";
-        foreach(libxml_get_errors() as $error) {
-            echo "<br>", $error->message;
-        }
-    } else {
-        print_r($xml);
-        $list = $xml->record;
-    }
-}
-
-
-
-
-
-function displayNode($node, $offset) {
-
-    if (is_object($node)) {
-        $node = get_object_vars($node);
-        foreach ($node as $key => $value) {
-            echo str_repeat(" ", $offset) . "-" . $key . "\n";
-            displayNode($value, $offset + 1);
-        }
-    } elseif (is_array($node)) {
-        foreach ($node as $key => $value) {
-            if (is_object($value))
-                displayNode($value, $offset + 1);
-            else
-                echo str_repeat(" ", $offset) . "-" . $key . "\n";
-        }
-    }
-}
-
-
-
-
-function readInvoice($target_file_xml){
     $xml = simplexml_load_file($target_file_xml); 
     echo $xml;
     $ns = $xml->getNamespaces(true);
@@ -143,126 +104,20 @@ function readInvoice($target_file_xml){
     
     echo "Entre al metodo readInvoice";
     
-    //EMPIEZO A LEER LA INFORMACION DEL CFDI E IMPRIMIRLA 
-    foreach ($xml->xpath('//cfdi:Comprobante') as $cfdiComprobante){ 
-        echo $cfdiComprobante['Version']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['Fecha']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['Sello']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['total']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['subTotal']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['certificado']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['formaDePago']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['noCertificado']; 
-        echo "<br />"; 
-        echo $cfdiComprobante['tipoDeComprobante']; 
-        echo "<br />"; 
-    } 
-    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Emisor') as $Emisor){ 
-        echo $Emisor['rfc']; 
-        echo "<br />"; 
-        echo $Emisor['nombre']; 
-        echo "<br />"; 
-    } 
-    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Emisor//cfdi:DomicilioFiscal') as $DomicilioFiscal){ 
-        echo $DomicilioFiscal['pais']; 
-        echo "<br />"; 
-        echo $DomicilioFiscal['calle']; 
-        echo "<br />"; 
-        echo $DomicilioFiscal['estado']; 
-        echo "<br />"; 
-        echo $DomicilioFiscal['colonia']; 
-        echo "<br />"; 
-        echo $DomicilioFiscal['municipio']; 
-        echo "<br />"; 
-        echo $DomicilioFiscal['noExterior']; 
-        echo "<br />"; 
-        echo $DomicilioFiscal['codigoPostal']; 
-        echo "<br />"; 
-    } 
-    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Emisor//cfdi:ExpedidoEn') as $ExpedidoEn){ 
-        echo $ExpedidoEn['pais']; 
-        echo "<br />"; 
-        echo $ExpedidoEn['calle']; 
-        echo "<br />"; 
-        echo $ExpedidoEn['estado']; 
-        echo "<br />"; 
-        echo $ExpedidoEn['colonia']; 
-        echo "<br />"; 
-        echo $ExpedidoEn['noExterior']; 
-        echo "<br />"; 
-        echo $ExpedidoEn['codigoPostal']; 
-        echo "<br />"; 
-    } 
-    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Receptor') as $Receptor){ 
-        echo $Receptor['rfc']; 
-        echo "<br />"; 
-        echo $Receptor['nombre']; 
-        echo "<br />"; 
-    } 
-    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Receptor//cfdi:Domicilio') as $ReceptorDomicilio){ 
-        echo $ReceptorDomicilio['pais']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['calle']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['estado']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['colonia']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['municipio']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['noExterior']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['noInterior']; 
-        echo "<br />"; 
-        echo $ReceptorDomicilio['codigoPostal']; 
-        echo "<br />"; 
-    } 
+    //Del PDF solamente se necesita la clave y va despues de PZ y un espacio vacio.
+    //Voy a necesitar del XML: Valor Unitario, Cantidad, Num_Partida
+    $numPartida = 1;
+
     foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto') as $Concepto){ 
         echo "<br />"; 
-        echo $Concepto['unidad']; 
+        echo $Concepto['Cantidad']; 
         echo "<br />"; 
-        echo $Concepto['importe']; 
+        echo $Concepto['ValorUnitario']; 
+        echo "<br />";    
+        echo str_pad($numPartida, 3, '0', STR_PAD_LEFT);;
         echo "<br />"; 
-        echo $Concepto['cantidad']; 
-        echo "<br />"; 
-        echo $Concepto['descripcion']; 
-        echo "<br />"; 
-        echo $Concepto['valorUnitario']; 
-        echo "<br />";   
-        echo "<br />"; 
-    } 
-    foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Impuestos//cfdi:Traslados//cfdi:Traslado') as $Traslado){ 
-        echo $Traslado['tasa']; 
-        echo "<br />"; 
-        echo $Traslado['importe']; 
-        echo "<br />"; 
-        echo $Traslado['impuesto']; 
-        echo "<br />";   
-        echo "<br />"; 
-    } 
-    
-    //ESTA ULTIMA PARTE ES LA QUE GENERABA EL ERROR
-    foreach ($xml->xpath('//t:TimbreFiscalDigital') as $tfd) {
-        echo $tfd['selloCFD']; 
-        echo "<br />"; 
-        echo $tfd['FechaTimbrado']; 
-        echo "<br />"; 
-        echo $tfd['UUID']; 
-        echo "<br />"; 
-        echo $tfd['noCertificadoSAT']; 
-        echo "<br />"; 
-        echo $tfd['version']; 
-        echo "<br />"; 
-        echo $tfd['selloSAT']; 
+        $numPartida++;
     } 
 }
-
 
 ?>
