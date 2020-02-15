@@ -54,7 +54,7 @@
             // echo '<script>alert("Lo siento, hubo un error al subir el archivo XML"); location.replace(document.referrer);</script>';
         }
         
-        generateMod($cliente, $num_almacen, $file_name, $arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida);
+        generateModXML($cliente, $num_almacen, $file_name, $arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida);
         
         $file_to_download = "uploads/".substr($file_name, 0, -4).".mod";
         downloadFile($file_to_download);
@@ -111,15 +111,92 @@ function generateMod($cliente, $num_almacen,$file_name,$arrayClaves, $arrayCanti
     fclose($myfile);
 }
 
-function generateModXML($file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
+function generateModXML($cliente, $num_almacen, $file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
     $file_name = substr($file_name, 0, -4);
-    echo $file_name;
-    $myfile = fopen($file_name.".xml", "w");
-    $txt = "John Doe\n";
-    fwrite($myfile, $txt);
-    $txt = "Jane Doe\n";
-    fwrite($myfile, $txt);
-    fclose($myfile);
+    $myfile = fopen("uploads/".$file_name.".mod", "w");
+    $refer = substr($file_name, -11);
+    fwrite($myfile,'<?xml version="1.0" encoding="UTF-8"?>');
+    fwrite($myfile,'<DATAPACKET Version="2.0">');
+    fwrite($myfile,"<METADATA>");
+    fwrite($myfile,'<FIELDS>');
+    fwrite($myfile,'<FIELD attrname="CVE_CLPV" fieldtype="string" WIDTH="10" />');
+    fwrite($myfile,'<FIELD attrname="NUM_ALMA" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="CVE_PEDI" fieldtype="string" WIDTH="20" />');
+    fwrite($myfile,'<FIELD attrname="ESQUEMA" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="DES_TOT" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="DES_FIN" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="CVE_VEND" fieldtype="string" WIDTH="5" />');
+    fwrite($myfile,'<FIELD attrname="COM_TOT" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="NUM_MONED" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="TIPCAMB" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="STR_OBS" fieldtype="string" WIDTH="255" />');
+    fwrite($myfile,'<FIELD attrname="ENTREGA" fieldtype="string" WIDTH="25" />');
+    fwrite($myfile,'<FIELD attrname="SU_REFER" fieldtype="string" WIDTH="20" />');
+    fwrite($myfile,'<FIELD attrname="TOT_IND" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="MODULO" fieldtype="string" WIDTH="4" />');
+    fwrite($myfile,'<FIELD attrname="CONDICION" fieldtype="string" WIDTH="25" />');
+    fwrite($myfile,'<FIELD attrname="dtfield" fieldtype="nested">');
+    fwrite($myfile,'<FIELDS>');
+    fwrite($myfile,'<FIELD attrname="CANT" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="CVE_ART" fieldtype="string" WIDTH="20" />');
+    fwrite($myfile,'<FIELD attrname="DESC1" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="DESC2" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="DESC3" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="IMPU1" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="IMPU2" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="IMPU3" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="IMPU4" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="COMI" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="PREC" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="NUM_ALM" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="STR_OBS" fieldtype="string" WIDTH="255" />');
+    fwrite($myfile,'<FIELD attrname="REG_GPOPROD" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="REG_KITPROD" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="NUM_REG" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="COSTO" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="TIPO_PROD" fieldtype="string" WIDTH="1" />');
+    fwrite($myfile,'<FIELD attrname="TIPO_ELEM" fieldtype="string" WIDTH="1" />');
+    fwrite($myfile,'<FIELD attrname="MINDIRECTO" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="TIP_CAM" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="FACT_CONV" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="UNI_VENTA" fieldtype="string" WIDTH="10" />');
+    fwrite($myfile,'<FIELD attrname="IMP1APLA" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="IMP2APLA" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="IMP3APLA" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="IMP4APLA" fieldtype="i4" />');
+    fwrite($myfile,'<FIELD attrname="PREC_SINREDO" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="COST_SINREDO" fieldtype="r8" />');
+    fwrite($myfile,'<FIELD attrname="LOTE" fieldtype="string" WIDTH="16" />');
+    fwrite($myfile,'<FIELD attrname="PEDIMENTO" fieldtype="string" WIDTH="16" />');
+    fwrite($myfile,'<FIELD attrname="FECHCADUC" fieldtype="dateTime" />');
+    fwrite($myfile,'<FIELD attrname="FECHADUANA" fieldtype="dateTime" />');
+    fwrite($myfile,'</FIELDS>');
+    fwrite($myfile,'<PARAMS />');
+    fwrite($myfile,'</FIELD>');
+    fwrite($myfile,'</FIELDS>');
+    fwrite($myfile,'<PARAMS />');
+    fwrite($myfile,'</METADATA>');
+    fwrite($myfile,'<ROWDATA>');
+    $clienteAlign = str_pad($cliente, 10, " ", STR_PAD_LEFT);
+    
+    fwrite($myfile,'<ROW CVE_CLPV="'.$clienteAlign.'" NUM_ALMA="'.$num_almacen.'" ESQUEMA="1" DES_TOT="0" DES_FIN="0" NUM_MONED="1" TIPCAMB="1" STR_OBS="" ENTREGA="" SU_REFER="'.$refer.'" TOT_IND="0" MODULO="COMP">');
+
+    fwrite($myfile,'<dtfield>');
+
+    for ($i=0; $i < count($arrayCantidad); $i++) { 
+        $cantidad = $arrayCantidad[$i];
+        $clave = $arrayClaves[$i];
+        $partida = $arrayPartida[$i];
+        $costo = $arrayValorUnitario[$i];
+
+        fwrite($myfile,'<ROWdtfield CANT="'.$cantidad.'" CVE_ART="'.$clave.'" DESC1="0" IMPU1="0" IMPU2="0" IMPU3="0" IMPU4="16" PREC="0" NUM_ALM="'.$num_almacen.'" STR_OBS="" REG_GPOPROD="0" COSTO="'.$costo.'" TIPO_PROD="P" TIPO_ELEM="N" MINDIRECTO="0" TIP_CAM="1" FACT_CONV="1" UNI_VENTA="pz" IMP1APLA="4" IMP2APLA="4" IMP3APLA="4" IMP4APLA="0" PREC_SINREDO="0" COST_SINREDO="'.$costo.'" />');
+    }
+
+    fwrite($myfile,'</dtfield>');
+    fwrite($myfile,'</ROW>');
+    fwrite($myfile,'</ROWDATA>');
+    fwrite($myfile,'</DATAPACKET>');
+
 }
 
 function readPDF($target_file_pdf){
@@ -162,8 +239,13 @@ function readXML($target_file_xml){
 
     foreach ($xml->xpath('//cfdi:Comprobante//cfdi:Conceptos//cfdi:Concepto') as $Concepto){
         $valUnit = (float)$Concepto['ValorUnitario'];
-        $tempValor = number_format($valUnit, 5, '.', ',');
-        
+        $tempValor = number_format($valUnit, 2, '.', '');
+        $lastDigits = substr($tempValor, -3);
+
+        if($lastDigits == ".00"){
+            $tempValor = intval($tempValor);
+        }
+
         array_push($arrayCantidad, $Concepto['Cantidad']);
         array_push($arrayValorUnitario, $tempValor);
         array_push($arrayPartida,str_pad($numPartida, 3, '0', STR_PAD_LEFT));
