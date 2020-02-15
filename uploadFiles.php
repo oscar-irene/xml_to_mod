@@ -1,6 +1,8 @@
 <?php
 error_reporting(E_ALL); // Error engine - always E_ALL!
 
+include 'vendor/autoload.php';
+ 
 $target_dir = "uploads/";
 $target_file_pdf = $target_dir . basename($_FILES["filePDF"]["name"]);
 $target_file_xml = $target_dir . basename($_FILES["fileXML"]["name"]);
@@ -59,40 +61,51 @@ $fileTypeXML = strtolower(pathinfo($target_file_xml,PATHINFO_EXTENSION));
 //     }
 // }
 
-if (move_uploaded_file($_FILES["fileXML"]["tmp_name"], $target_file_xml)) {
-    //echo '<script>alert("Descargando archivo"); location.replace(document.referrer);</script>';
-    echo "Exito XML \n\n";
-    // readXML($target_file_xml);
+    if (move_uploaded_file($_FILES["filePDF"]["tmp_name"], $target_file_pdf)) {
+        // echo '<script>alert("Descargando archivo"); location.replace(document.referrer);</script>';
+        readPDF($target_file_pdf);
+    } else {
+        echo '<script>alert("Lo siento, hubo un error al subir el archivo PDF"); location.replace(document.referrer);</script>';
+    }
 
-    echo "New method";
+// THI IS CORRECT
+// if (move_uploaded_file($_FILES["fileXML"]["tmp_name"], $target_file_xml)) {
+//     //echo '<script>alert("Descargando archivo"); location.replace(document.referrer);</script>';
+//     echo "Exito XML \n\n";
 
-    readXML($target_file_xml);
+//     readXML($target_file_xml);
     
-    // $xf = file_get_contents($target_file_xml);
-    // $xml = simplexml_load_string($xf);
-
-    // $xml = simplexml_load_file($target_file_xml);
-    // foreach ($xml->nodos->item as $elemento) 
-    //     {
-    //         echo $elemento;
-    //     // echo "El título es" .$elemento->title. "<br>";
-    //     // echo "El link es" .$elemento->description. "<br>";
-    //     // echo "El description es" .$elemento->description. "<br>";
-        
-    //     // //saco los namespaces
-    //     // $namespaces = $elemento->getNameSpaces(true);
-    //     // $media = $elemento->children($namespaces['media']);
-    //     // echo "El thumbnail es:" .$media->thumbnail."<br>";
-    //     }
-
-    // displayNode($xml, 0);
-} else {
-    echo '<script>alert("Lo siento, hubo un error al subir el archivo XML"); location.replace(document.referrer);</script>';
-}
+// } else {
+//     echo '<script>alert("Lo siento, hubo un error al subir el archivo XML"); location.replace(document.referrer);</script>';
+// }
 
 function readPDF($target_file_pdf){
     // Code to be executed
+    
+    // Parse pdf file and build necessary objects.
+    $parser = new \Smalot\PdfParser\Parser();
+    $pdf    = $parser->parseFile($target_file_pdf);
+    $pdfText = $pdf->getText();
+    // echo $pdfText;
+    $pdfArray = explode(" ", $pdfText);
+    
+    for ($i=0; $i < count($pdfArray); $i++) { 
+        // echo $pdfArray[$i]."_";
+        $compareString = substr($pdfArray[$i], -3);
+        // echo $compareString;
+        if($compareString == ".00"){
+            // echo $pdfArray[$i+1];
+            $firstLetter = $pdfArray[$i+1][0];
+            if(!is_numeric($firstLetter)){
+                echo $pdfArray[$i+1];
+                echo "</br>-----</br>";
+            }
+            // if (var_dump(is_numeric($pdfArray[$i+1][0]))){
+            //     echo $pdfArray[$i+1];
+            // }
 
+        }
+    }
 }
 
 function readXML($target_file_xml){
