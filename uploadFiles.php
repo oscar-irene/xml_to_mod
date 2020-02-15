@@ -53,15 +53,26 @@
         } else {
             // echo '<script>alert("Lo siento, hubo un error al subir el archivo XML"); location.replace(document.referrer);</script>';
         }
+        
         generateMod($cliente, $num_almacen, $file_name, $arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida);
+        
+        $file_to_download = "uploads/".substr($file_name, 0, -4).".mod";
+        downloadFile($file_to_download);
+        
     }else{
         echo "Problems while converting";
     }
-
+function downloadFile($file_to_download){
+    $file_path = $file_to_download;
+    header("Content-Type: application/octet-stream");
+    header("Content-Transfer-Encoding: Binary");
+    header("Content-disposition: attachment; filename=\"" . basename($file_to_download) . "\"");
+    readfile($file_to_download);
+}
 function generateMod($cliente, $num_almacen,$file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
     $file_name = substr($file_name, 0, -4);
     echo $file_name;
-    $myfile = fopen($file_name.".mod", "w");
+    $myfile = fopen("uploads/".$file_name.".mod", "w");
 
     fwrite($myfile,"[Cabeza]\n");
     fwrite($myfile,"RPROVEE=.\n");
