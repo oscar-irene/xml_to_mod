@@ -39,10 +39,12 @@
 
         if (move_uploaded_file($_FILES["filePDF"]["tmp_name"], $target_file_pdf)) {
             // echo '<script>alert("Descargando archivo"); location.replace(document.referrer);</script>';
-            $arrayClaves = readPDF($target_file_pdf);
+            // echo "ReadPDFAlmacen";
+            $arrayClaves = readPDFalmacen($target_file_pdf);
         } else {
             // echo '<script>alert("Lo siento, hubo un error al subir el archivo PDF"); location.replace(document.referrer);</script>';
         }
+
 
         if (move_uploaded_file($_FILES["fileXML"]["tmp_name"], $target_file_xml)) {
             //echo '<script>alert("Descargando archivo"); location.replace(document.referrer);</script>';
@@ -62,6 +64,35 @@
     }else{
         echo "Problems while converting";
     }
+
+
+function readPDFalmacen($target_file_pdf){
+    $parser = new \Smalot\PdfParser\Parser();
+    $pdf    = $parser->parseFile($target_file_pdf);
+    $pdfText = $pdf->getText();
+    // echo $pdfText;
+    // $pdfText = preg_replace('/\s+/', '', $string);
+    $pdfArray = preg_split('/\s+/', $pdfText);
+    $arrayClaves = array();
+
+
+    for ($i=0; $i < count($pdfArray); $i++) { 
+        $compareString = substr($pdfArray[$i], -3);
+        // echo $pdfArray[$i];
+        if($compareString == ".00"){
+            $firstLetter = $pdfArray[$i+1][0];
+            // echo "   FIRSTLETTER   ".$firstLetter. "   arrayClave:   ".$pdfArray[$i+1];
+            if(!is_numeric($firstLetter)){
+                // echo $pdfArray[$i+1];
+                array_push($arrayClaves, $pdfArray[$i+1]);
+                // echo "</br>-----</br>";
+            }
+        }
+    }
+    // echo count($arrayClaves);
+    return $arrayClaves;
+}
+
 function downloadFile($file_to_download){
     $file_path = $file_to_download;
     header("Content-Type: application/octet-stream");
@@ -69,6 +100,7 @@ function downloadFile($file_to_download){
     header("Content-disposition: attachment; filename=\"" . basename($file_to_download) . "\"");
     readfile($file_to_download);
 }
+
 function generateMod($cliente, $num_almacen,$file_name,$arrayClaves, $arrayCantidad, $arrayValorUnitario, $arrayPartida){
     $file_name = substr($file_name, 0, -4);
     echo $file_name;
@@ -205,7 +237,7 @@ function readPDF($target_file_pdf){
     $pdfText = $pdf->getText();
     $pdfArray = explode(" ", $pdfText);
     $arrayClaves = array();
-
+  
     for ($i=0; $i < count($pdfArray); $i++) { 
         $compareString = substr($pdfArray[$i], -3);
         if($compareString == ".00"){
